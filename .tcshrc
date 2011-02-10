@@ -1,0 +1,35 @@
+alias h		history 25
+alias ls ls --color=auto
+alias grep grep --color=auto
+alias fgrep fgrep --color=auto
+alias egrep egrep --color=auto
+
+# some more ls aliases
+alias ll  ls -alF
+alias la ls -A
+alias l ls -CF
+
+# A righteous umask
+umask 22
+
+setenv	EDITOR	vim
+setenv	PAGER	less
+setenv	BLOCKSIZE	K
+set history = 5000
+set savehist = 5000
+
+if ($?prompt) then
+	# An interactive shell -- set some stuff up
+	set prompt="%n@%m:%~> "
+	set filec
+	set history = 5000
+	set savehist = 5000
+	if ( $?tcsh ) then
+		bindkey "^W" backward-delete-word
+		bindkey -k up history-search-backward
+		bindkey -k down history-search-forward
+	endif
+endif
+
+set nobeep
+set autolist
