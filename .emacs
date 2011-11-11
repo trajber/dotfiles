@@ -46,6 +46,20 @@
 (global-set-key "\C-f"        'highlight-phrase)
 (global-set-key [C-delete]    'my-kill-buffer) 
 
+;; Toggles source/header file
+;; modified to nicbr
+(setq-default cc-other-file-alist 
+							'(
+								("\\.cpp$"  (".H"))
+								("\\.H$"   (".cpp"))
+								))
+(setq ff-search-directories 
+      '("."
+        "~/here/goes/some/paths/*"
+        "~/here/goes/another/paths/*"
+				))
+(add-hook 'c-mode-common-hook (lambda() (local-set-key (kbd "C-o ") 'ff-find-other-file)))
+
 
 (defun indent-buffer ()
   (interactive)
