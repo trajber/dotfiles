@@ -1,5 +1,8 @@
 (setq
  load-path (cons (expand-file-name "~/.emacs.d") load-path)
+ load-path (cons (expand-file-name "~/.emacs.d/interface") load-path)
+ load-path (cons (expand-file-name "~/.emacs.d/auto-complete") load-path)
+ load-path (cons (expand-file-name "~/.emacs.d/auto-complete-clang") load-path)
  inhibit-startup-message t
  next-line-add-newlines nil
  require-final-newline t
@@ -16,35 +19,48 @@
  auto-save-list-file-prefix "~/.backups/save-"
  indent-line-function 'indent-relative-maybe
  default-frame-alist (cons '(cursor-type . bar) (copy-alist default-frame-alist))
- c-default-style "gnu" 
-; tab-width 4
- c-basic-offset 2 
- default-tab-width 2 
- indent-tabs-mode nil)
+ c-default-style "gnu"
+ tab-width 2
+ c-basic-offset 2
+ default-tab-width 2
+ indent-tabs-mode nil
+ )
 
 (fset 'yes-or-no-p (symbol-function 'y-or-n-p))
 (set-scroll-bar-mode 'right)
-
-(set-default-font "-Misc-Fixed-Medium-R-Normal--15-140-75-75-C-90-ISO8859-1")
+;(set-default-font "Inconsolata-12")
+(set-face-attribute 'default nil :family "Inconsolata" :height 130)
 
 (tool-bar-mode nil)
 (column-number-mode t)
 (line-number-mode t)
 (show-paren-mode t)
-;(ido-mode t)
 
 (global-set-key [home]        'beginning-of-line)
 (global-set-key [end]         'end-of-line)
 (global-set-key [(control z)] 'undo)
 (global-set-key "\C-l"        'goto-line)
 (global-set-key [f2]          'save-buffer)
-(global-set-key [f3]          'split-window-vertically)
+(global-set-key [f3]          'remove-split) 
 (global-set-key [f4]          'split-window-horizontally)
 (global-set-key [f5]          'indent-buffer)
 (global-set-key [f7]          'compile)
-(global-set-key [f11]         'fullscreen)
+(global-set-key [f11]          'cscope-find-global-definition)
+;(global-set-key [f11]          'cscope-find-this-symbol)
+(global-set-key [f12]          'cscope-find-this-file)
 (global-set-key "\C-f"        'highlight-phrase)
-(global-set-key [C-delete]    'my-kill-buffer) 
+(global-set-key [C-delete]    'my-kill-buffer)
+
+(defun indent-buffer ()
+  (interactive)
+  (delete-trailing-whitespace)
+  (indent-region (point-min) (point-max) nil)
+  )
+
+(defun my-kill-buffer ()
+	(interactive)
+	(kill-buffer (buffer-name))
+	(set-name))
 
 ;; Toggles source/header file
 ;; modified to nicbr
@@ -55,35 +71,30 @@
 								))
 (setq ff-search-directories 
       '("."
-        "~/here/goes/some/paths/*"
-        "~/here/goes/another/paths/*"
+        "~/projects/SEL/*"
+        "~/projects/SEL/include/*"
+        "~/projects/registro.br/src/*"
+        "~/projects/registro.br/src/lib/*"
+				"~/projects/registro.br/include/*"
 				))
+
 (add-hook 'c-mode-common-hook (lambda() (local-set-key (kbd "C-o ") 'ff-find-other-file)))
-
-
-(defun indent-buffer ()
-  (interactive)
-  (delete-trailing-whitespace)
-  (indent-region (point-min) (point-max) nil)
-  ;; (untabify (point-min) (point-max))
-  )
 
 (add-hook 'c++-mode-hook
           '(lambda ()
-	     (interactive) (column-marker-2 80)))
-;             (make-local-hook 'write-contents-hooks) ;; indent buffer on save
-;             (add-hook 'write-contents-hooks 'indent-buffer))) ;; indent buffer on save
+						 (interactive) (column-marker-2 80)))
 
-(defun my-kill-buffer () 
-   (interactive) 
-   (kill-buffer (buffer-name)) 
-   (set-name))
+;; CScope
+;; find /home/mauro/projects/ -name "*.cpp" -o -name "*.H" > ~/projects/cscope_db/cscope.files
+;; cscope -b -q -k
+(when (require 'xcscope nil 'noerror)
+	(cscope-set-initial-directory "~/projects/cscope_db")
+	(setq cscope-do-not-update-database t))
 
-;; http://www.emacswiki.org/emacs/AutoInsertMode
-(when (require 'autoinsert nil 'noerror)
-  (progn
-    (auto-insert-mode)
-    (setq auto-insert-query nil)))
+; JavaScript mode
+;; https://github.com/mooz/js2-mode
+(autoload 'js2-mode "js2-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 
 ;; http://stud4.tuwien.ac.at/~e0225855/linum/linum.html
 ;; http://www.emacswiki.org/emacs/linum+.el
@@ -108,12 +119,21 @@
 (when (require 'autopair nil 'noerror)
   (autopair-global-mode))
 
-;; column marker
-(when (require 'column-marker)
-  (progn
-   (column-marker-2 80)))
-
 ;; used to show tabs and spaces
 (require 'whitespace)
 
 (require 'smarttabs)
+(smart-tabs-advice js2-indent-line js2-basic-offset)
+
+;; column marker
+(when (require 'column-marker)
+  (progn
+    (column-marker-2 80)))
+
+;; http://code.google.com/p/yasnippet/
+(add-to-list 'load-path
+						 "~/.emacs.d/plugins/yasnippet")
+(require 'yasnippet)
+(yas/initialize)
+(yas/load-directory "~/.emacs.d/plugins/yasnippet/snippets/")
+
