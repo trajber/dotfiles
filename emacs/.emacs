@@ -67,6 +67,8 @@
           '(lambda ()
 						 (interactive) (column-marker-2 80)))
 
+(add-hook 'before-save-hook #'gofmt-before-save)
+
 ;; http://www.emacswiki.org/emacs/linum+.el
 (when (require 'linum nil 'noerror)
   (progn
@@ -102,4 +104,10 @@
 (when (require 'column-marker)
   (progn
     (column-marker-2 80)))
+
+(require 'go-mode-load)
+(require 'go-autocomplete)
+(require 'auto-complete-config)
+(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+(ac-config-default)
 
